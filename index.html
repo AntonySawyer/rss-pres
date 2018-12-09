@@ -1,0 +1,752 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>RevealJS : c:\Users\Antony\Documents\GitHub\slides\index.md</title>
+  <link rel="stylesheet" href="css/reveal.css">
+  <link rel="stylesheet" href="css/theme/Serif.css" id="theme">
+  <link rel="stylesheet" href="lib/css/Sunburst.css">
+  <!-- If the query includes 'print-pdf', use the PDF print sheet -->
+  <script>
+    document.write('<link rel="stylesheet" href="css/print/' + (window.location.search.match(/print-pdf/gi) ? 'pdf' : 'paper') + '.css" type="text/css" media="print">');
+  </script>
+  <style type="text/css">
+    @page {
+      margin: 0;
+      size: auto;
+    }
+  </style>
+  <script>
+    if (window.location.search.match(/print-pdf-now/gi)) {
+      window.print();
+    }
+  </script>
+</head>
+
+<body>
+  <div class="reveal">
+    <div class="slides">
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Inheritance and Prototype Chain in Javascript
+<aside class="notes">Inheritance and Prototype Chain in Javascript</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+JavaScript might be, indeed, a bit confusing and troublesome at first, especially for developers experienced in class-based languages (*like Java or C++*). In addition to the aspect of its dynamic behaviors, Javascript does not provide a class implementation per se (the class keyword is introduced in ES2015, but syntactical sugar, JavaScript remains **prototype-based** underneath). It uses the concept of **prototypes** and **prototype chaining** for inheritance.
+<aside class="notes">In addition to the aspect of its dynamic behaviors, Javascript does not provide a class implementation (the class keyword is introduced in ES6). It uses the concept of prototypes and prototype chaining for inheritance.</aside>
+          </script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Objects Inherit from Objects
+<aside class="notes">Just go to the next slide.</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+If you’ve ever read anything about inheritance in JS before, then you’ve probably heard that *objects inherit from other objects*. This is correct. And once you already grasp the knowledge of it, it’s a good way to think about things.
+<aside class="notes">If you’ve ever read anything about inheritance in JS before, then you’ve probably heard that objects inherit from other objects. This is correct. And once you already grasp the knowledge of it, it’s a good way to think about things.</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Still, my goal here is to help people who’s never used prototypal inheritance to become comfortable with it. In order achieve such thing, I decided cut down a few small corners here, which may help eliminate a bit of confusion.
+<aside class="notes">Still, my goal here is to help people who’s never used prototypal inheritance to become comfortable with it. In order achieve such thing, I decided cut down a few small corners here, which may help eliminate a bit of confusion.</aside>
+          </script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Function prototypes
+<aside class="notes">Next slide</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### In JavaScript, all functions are also objects, which means that they can have properties. And it happens that they all have a property called prototype in common, whose type is also object.
+<aside class="notes">In JavaScript, all functions are also objects, which means that they can have properties. And it happens that they all have a property called prototype in common, whose type is also object.</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+```js
+function doSomething() {
+}
+console.log(typeof doSomething.prototype); // ‘object’
+```
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Pretty easy to understand, right? As soon as a function is created, it will automatically have a property called `prototype` initialized to an empty object.
+            <aside class="notes">Pretty easy to understand, right? As soon as a function is created, it will automatically have a property called prototype initialized to an empty object.</aside>
+          </script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Constructors
+<aside class="notes">Next slide</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+In JavaScript, there’s really no difference between a *“regular” function* and a *constructor function*. They’re actually all the same. But as a convention, functions that are meant to be used as constructors are generally capitalized.
+            <aside class="notes">about regular and constructor functions</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+So let’s say, we wanna make a constructor function named `Human`:
+```js
+function Human(name) {
+  this.name = name;
+}
+```
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+**new** keyword Any time you see the **new** keyword, it means that the following function is being used as a constructor. The **new** keyword is intended for constructing a new object, or more generally speaking, making an instance of a "class".
+            <aside class="notes">speak about 'new'</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+**this** keyword When a function is used as a constructor, **this** refers to the new object that you’re creating.
+            <aside class="notes">speak about 'this'</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+In our `Human` constructor, we’re taking `name` as an argument and then assigning this value to the `name` property of our new `Human` instance. Now that we have been able to make an instance of `Human` through the usage of **new** keyword...
+            <aside class="notes">example explaining</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+```js
+var engineer = new Human('Harrison Wells');
+```
+...and ended up having an useless engineer who’s a **Human** but doesn’t really do anything.
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Methods
+<aside class="notes">Next slide</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+It’s about time to make our `Human` act a little more human-like by adding a new method called `greet`.
+```js
+function Human(name) {
+  this.name = name;
+}
+Human.prototype.greet = function() {
+ console.log(this.name + ' said Hello!');
+};
+```
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+There’s that **this** keyword again. Just like in the constructor, **this** inside of a method refers to the instance.
+
+You should remember from earlier that all functions automatically get initialized with a `prototype` object. In the example above, we tacked a function onto it called `greet`.
+            <aside class="notes">Explain this and prototype again, before example</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Now let’s make ourselves a brand-new engineer.
+```js
+function Human(name) {
+  this.name = name;
+}
+Human.prototype.greet = function() {
+  console.log(this.name + ' said Hello!');
+};
+var engineer = new Human('Harrison Wells');
+engineer.greet(); // ‘Harrison Wells said Hello!’
+```
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Differential Inheritance
+<aside class="notes">Next slide</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+JavaScript uses an inheritance model called *“differential inheritance”*, whose mechanism is explained that methods aren’t copied from parent to child. Instead, children have an *“invisible link”* back to their parent object.
+            <aside class="notes">Intro in differential inheritance</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Differential Inheritance is a common prototype-oriented model that uses the concept that most objects are derived from other, more generic objects, and only differ in a few small aspects. Each object maintains a reference to its prototype and a table of properties that are different.
+            <aside class="notes">Almost deep explain differential inheritance</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+For example, `engineer` doesn’t actually have its own method called `greet`. In other words:
+```js
+console.log(engineer.hasOwnProperty('greet') === false); // true
+```
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### What actually happens when I write `engineer.greet()` is this:
+- The JS engine looks for a property called `greet` on our `engineer` object.
+
+- It doesn’t find one, so it *looks “up the prototype chain”* to engineer’s parent, which is `Human.prototype`.
+
+- It finds `Human.prototype.greet` and calls it with this bound to `engineer`.
+<aside class="notes">Speak about example</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### That part is really important, so I’m going to repeat it:
+
+There’s really no such property as **engineer.greet**. It doesn’t exist. Instead, **engineer** has access to the **greet()** method on **Human.prototype** because it’s an instance of **Human**. This is the “invisible link” I mentioned. More commonly, it’s referred to as the “prototype chain”.
+<aside class="notes">Repeat most important</aside>
+          </script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Object.create()
+<aside class="notes">Next slide</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Okay. We talked a little bit about differential inheritance and the prototype chain. Now it’s time to put that into action.
+Since ES5, JavaScript has had a cool little function called `Object.create()`.
+            <aside class="notes">Object.create() intro</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Here’s how it works:
+```js
+var mammal = {
+  jump: function() {
+    console.log(‘Jumped!’);
+  }
+};
+var tomCat = Object.create(mammal);
+tomCat.hasOwnProperty(‘jump’); // false
+tomCat.jump(); // ‘Jumped!’
+```
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### So what is it doing?
+
+Essentially, it creates a new, empty object that has parent in its prototype chain. That means that even though `tomCat` doesn’t have its own `jump` method, it has access to the `jump` method from parent.
+<aside class="notes">Object.create() example explain</aside>
+          </script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## Prototypal Inheritance
+<aside class="notes">Next slide</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+What if we want to make a new class of object that inherits from `Human`?
+
+Let’s say we need a class called `MetaHuman` (well, in case you have absolutely no idea what MetaHuman is, I suggest you have a quick glace at MetaHuman Wikia. In short, MetaHumans are superhuman individuals who acquired powers and abilities unlike those of normal humans after experiencing mutation of their bodies. *In another word, **MetaHuman** is just a specific type of **Human**.*
+<aside class="notes">Prototypal Inheritance intro</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### Subclass constructor
+===================
+<aside class="notes">Next slide</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+We’ll start by creating its constructor.
+```js
+function MetaHuman(name, alias, power) {
+ this.name = name;
+ this.alias = alias;
+ this.power = power;
+}
+```
+<aside class="notes">Some code here</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Although there is no critical problem with this code so far, we can see that there is a repetation in a piece of code (`this.name = name`, which is exactly like that in the `Human` constructor). What if the Human constructor receives more than 1 parameters, for example, `name`, `age` and `location`? Are we gonna repeat one line of code for each of these arguments?
+            <aside class="notes">Explain subclass constructor</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+In the middle of crisis, `call` method was born like a savior of the day. The `call` method is a predefined Javascript function method which can be used to invoke a function with an owner object as the first argument.
+### Will `call`, you are able to use a method belonging to another object.
+<aside class="notes">speak about 'call'</aside>
+          </script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Let's take a look at the example below:
+```js 
+var cat = {
+  name: 'Tom',
+  run: function() {
+    console.log(this.name + ' ran!');
+  }
+};
+
+var mouse = {
+  name: 'Jerry'
+};
+
+cat.run(); // Tom ran!
+mouse.run(); //ERROR, because run is not a method of mouse
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+The right way:
+```js
+cat.run.call(mouse); // Jerry ran!
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+So let come back to our original problem. We will eliminate the code repetation via using `call` method inside `MetaHuman` constructor in order to invoke the `Human` constructor with corresponding parameters.
+```js 
+function MetaHuman(name, alias, power) {
+ Human.call(this, name);
+ this.alias = alias;
+ this.power = power;
+}
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### Setup prototype chain for inheritance
+===================
+<aside class="notes">Next slide</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+So, that’s all well and good, but how do we make `MetaHuman` inherit from `Human`? 
+### It’s all about setting up the prototype chain.
+<aside class="notes">Setup prototype chain for inheritance intro</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+If you remember from earlier, we can use `Object.create()` to create an empty object that inherits from another object. In the case of `MetaHuman`, that means all we need to do is this:
+```js
+MetaHuman.prototype = Object.create(Human.prototype);
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+All instances of `MetaHuman` will automatically have `Human.prototype` in their prototype chain, and because `MetaHuman.prototype` has `Human.prototype` in its prototype chain, every `MetaHuman` will have access to the methods of `Human`.
+<aside class="notes">Explain example</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### In other words, we can do this:
+```js
+var flash = new MetaHuman('Barry Allen', 'Flash', 'Superspeed');
+flash.greet(); // Barry Allen said Hello!
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+One point we need to notice is that `MetaHuman.prototype.constructor` is now Human while it is supposed to be `MetaHuman`. This is due to the fact that `MetaHuman.prototype` holds a references to an instance created via `Human` method. We can fix this by reassign the constructor to `MetaHuman`:
+```js
+MetaHuman.prototype = Object.create(Human.prototype);
+MetaHuman.prototype.constructor = MetaHuman;
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### Override parent method
+===================
+<aside class="notes">Next slide</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Well, any meta-human can greet now, so far so good. But we do know that with the same behavior, each person has their own way to carry it out, right? What if a human needs to greet in a human way and a meta-human need to greet in, well, meta-human way? =)) In another word, despite the method bearing the same name, it is achievable that `MetaHuman` has `greet` specific to themselve instead of using the abstract parent class's `greet`:
+<aside class="notes">Override parent method intro</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+```js 
+MetaHuman.prototype.greet = function() {
+  // a hero needs to protect their real identity, thus cannot
+  // say Hello with their real name, right?
+  console.log(this.alias + ' said Hello to citizens!');
+};
+var vibe = new MetaHuman('Cisco', 'Vibe', 'Vibrational Blast');
+vibe.greet(); // Vibe said Hello to citizens!
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### Add specific method of subclass
+===================
+<aside class="notes">Next slide</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Last but not least, we can also add new methods that are specific to `MetaHuman`. Remember, `MetaHuman.prototype` is just an empty object right now (albeit with a link back to `Human.prototype`).
+<aside class="notes">Explain specific method of subclass</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+```js
+MetaHuman.prototype.usePower = function() {
+  console.log(this.alias + ' used ' + this.power + '!');
+};
+var kFrost = new MetaHuman('Caitlin', 'Frost', 'Cryokinesis');
+kFrost.userPower(); // Killer Frost used Cryokinesis!
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## ECMAScript 2015 
+### Classes
+<aside class="notes">Next slide</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+ECMAScript 2015 introduces class syntax to JavaScript as a way to write reusable classes using easier, cleaner syntax, which is more similar to classes in C++ or Java. In this section we'll convert the Person and Teacher examples from prototypal inheritance to classes, to show you how it's done.
+
+Let's look at a versions of the Person example:
+<aside class="notes">ECMAScript 2015 intro</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### ES5
+```js
+function Person(first, last, age, gender, interests) {
+  this.name = {
+    first,
+    last
+  };
+  this.age = age;
+  this.gender = gender;
+  this.interests = interests;
+};
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### ES6
+```js
+class Person {
+  constructor(first, last, age, gender, interests) {
+    this.name = { first, last };
+    this.age = age;
+    this.gender = gender;
+    this.interests = interests;
+  }
+  greeting() {
+    console.log(`Hi! I'm ${this.name.first}`);
+  };
+  farewell() {
+    console.log(`${this.name.first} has left the building.`);
+  };
+}
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+The class statement indicates that we are creating a new class. Inside this block, we define all the features of the class:
+- The `constructor()` method defines the constructor function that represents our `Person` class.
+<aside class="notes">Explain clases</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+- `greeting()` and `farewell()` are class methods. Any methods you want associated with the class are defined inside it, after the contructor. In this example, we've used template literals rather than string concatenation to make the code easier to read.
+<aside class="notes">How make code easier to read?</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+We can now instantiate object instances using the **new** operator, in just the same way as we did before:
+```js
+let han = new Person('Han', 'Solo', 25, 'M', ['Smuggling']);
+han.greeting();
+// Hi! I'm Han
+
+let leia = new Person('Leia', 'Organa', 19, 'F', ['Goverment']);
+leia.farewell();
+// Leia has left the building. Bye for now
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+### Inheritance with class syntax
+Above we created a class to represent a person. They have a series of attributes that are common to all people; in this section we'll create our specialized `Teacher` class, making it inherit from `Person` using modern class syntax. This is called creating a subclass or subclassing.
+
+To create a subclass we use the extends keyword to tell JavaScript the class we want to base our class on.
+<aside class="notes">Inheritance with class syntax intro</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+```js
+class Teacher extends Person {
+  constructor(first, last, age, gender, hobby, subject, grade) {
+    this.name = {
+      first,
+      last
+    };
+  this.age = age;
+  this.gender = gender;
+  this.hobby = hobby;
+  // subject and grade are specific to Teacher
+  this.subject = subject;
+  this.grade = grade;
+  }
+}
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+We can make the code more readable by defining the `super()` operator as the first item inside the `constructor()`. This will call the parent class' constructor, and inherit the members we specify as parameters of `super()`, as long as they are defined there:
+<aside class="notes">Explain code</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+```js
+class Teacher extends Person {
+  constructor(first, last, age, gender, hobby, subject, grade) {
+    super(first, last, age, gender, hobby);
+
+    // subject and grade are specific to Teacher
+    this.subject = subject;
+    this.grade = grade;
+  }
+}
+```
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+When we instantiate `Teacher` object instances, we can now call methods and properties defined on both `Teacher` and `Person`, as we'd expect:
+```js
+let snape = new Teacher('Severus', 'Snape', 58, 'M', 
+['Potions'], 'Dark arts', 5);
+
+snape.greeting(); // Hi! I'm Severus.
+snape.farewell(); // Severus has left the building. Bye for now.
+snape.age // 58
+snape.subject; // Dark arts
+```
+Like we did with Teachers, we could create other subclasses of `Person` to make them more specialized without modifying the base class.
+<aside class="notes">Some code here</aside>
+</script>
+        </section>
+      </section>
+      <section>
+        <section data-markdown>
+          <script type="text/template">
+## When would you use inheritance in JavaScript?
+<aside class="notes">Next slide</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Particularly after this last article, you might be thinking "woo, this is complicated". Well, you are right. Prototypes and inheritance represent some of the most complex aspects of JavaScript, but a lot of JavaScript's power and flexibility comes from its object structure and inheritance, and it is worth understanding how it works.
+<aside class="notes">Particularly after this last article, you might be thinking "woo, this is complicated". Well, you are right. Prototypes and inheritance represent some of the most complex aspects of JavaScript, but a lot of JavaScript's power and flexibility comes from its object structure and inheritance, and it is worth understanding how it works.</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+In a way, you use inheritance all the time. Whenever you use various features of a Web API , or methods/properties defined on a built-in browser object that you call on your strings, arrays, etc., you are implicitly using inheritance.
+<aside class="notes">In a way, you use inheritance all the time. Whenever you use various features of a Web API , or methods/properties defined on a built-in browser object that you call on your strings, arrays, etc., you are implicitly using inheritance.</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+In terms of using inheritance in your own code, you probably won't use it often, especially to begin with, and in small projects. It is a waste of time to use objects and inheritance just for the sake of it when you don't need them. But as your code bases get larger, you are more likely to find a need for it. If you find yourself starting to create a number of objects that have similar features, then creating a generic object type to contain all the shared functionality and inheriting those features in more specialized object types can be convenient and useful.
+<aside class="notes">In terms of using inheritance in your own code, you probably won't use it often, especially to begin with, and in small projects. It is a waste of time to use objects and inheritance just for the sake of it when you don't need them. But as your code bases get larger, you are more likely to find a need for it. If you find yourself starting to create a number of objects that have similar features, then creating a generic object type to contain all the shared functionality and inheriting those features in more specialized object types can be convenient and useful.</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+When using inheritance, you are advised to not have too many levels of inheritance, and to keep careful track of where you define your methods and properties. It is possible to start writing code that temporarily modifies the prototypes of built-in browser objects, but you should not do this unless you have a really good reason. Too much inheritance can lead to endless confusion, and endless pain when you try to debug such code.
+<aside class="notes">When using inheritance, you are advised to not have too many levels of inheritance, and to keep careful track of where you define your methods and properties. It is possible to start writing code that temporarily modifies the prototypes of built-in browser objects, but you should not do this unless you have a really good reason. Too much inheritance can lead to endless confusion, and endless pain when you try to debug such code.</aside>
+</script>
+        </section>
+        <section data-markdown>
+          <script type="text/template">
+Ultimately, objects are just another form of code reuse, like functions or loops, with their own specific roles and advantages. If you find yourself creating a bunch of related variables and functions and want to track them all together and package them neatly, an object is a good idea. Objects are also very useful when you want to pass a collection of data from one place to another. Both of these things can be achieved without use of constructors or inheritance. If you only need a single instance of an object, then you are probably better off just using an object literal, and you certainly don't need inheritance.
+<aside class="notes">Ultimately, objects are just another form of code reuse, like functions or loops, with their own specific roles and advantages. If you find yourself creating a bunch of related variables and functions and want to track them all together and package them neatly, an object is a good idea. Objects are also very useful when you want to pass a collection of data from one place to another. Both of these things can be achieved without use of constructors or inheritance. If you only need a single instance of an object, then you are probably better off just using an object literal, and you certainly don't need inheritance.</aside>
+</script>
+        </section>
+      </section>
+      <section data-markdown>
+        <script type="text/template">
+# THE END
+<aside class="notes">Thnx and etc</aside>
+</script>
+      </section>
+    </div>
+  </div>
+
+  <script src="lib/js/head.min.js"></script>
+  <script src="js/reveal.js"></script>
+
+  <script>
+    function extend() {
+      var target = {};
+      for (var i = 0; i < arguments.length; i++) {
+        var source = arguments[i];
+        for (var key in source) {
+          if (source.hasOwnProperty(key)) {
+            target[key] = source[key];
+          }
+        }
+      }
+      return target;
+    }
+    // Optional libraries used to extend on reveal.js
+    var deps = [
+      { src: 'lib/js/classList.js', condition: function () { return !document.body.classList; } },
+      { src: 'plugin/markdown/marked.js', condition: function () { return !!document.querySelector('[data-markdown]'); } },
+      { src: 'plugin/markdown/markdown.js', condition: function () { return !!document.querySelector('[data-markdown]'); } },
+      { src: 'plugin/highlight/highlight.js', async: true, callback: function () { hljs.initHighlightingOnLoad(); } },
+      { src: 'plugin/notes/notes.js', async: true, condition: function () { return !!document.body.classList; } },
+      { src: 'plugin/math/math.js', async: true }
+    ];
+    // default options to init reveal.js
+    var defaultOptions = {
+      controls: true,
+      progress: true,
+      history: true,
+      center: true,
+      transition: 'default',
+      dependencies: deps
+    };
+    // options from URL query string
+    var queryOptions = Reveal.getQueryHash() || {};
+    var options = {
+      "notesSeparator": "note:",
+      "separator": "^[\r\n?|\n]---[\r\n?|\n]$",
+      "verticalSeparator": "^[\r\n?|\n]--[\r\n?|\n]$",
+      "theme": "Serif",
+      "highlightTheme": "Sunburst",
+      "controls": true,
+      "progress": true,
+      "slideNumber": false,
+      "history": true,
+      "keyboard": true,
+      "overview": true,
+      "center": true,
+      "touch": true,
+      "loop": false,
+      "rtl": false,
+      "shuffle": false,
+      "fragments": true,
+      "embedded": false,
+      "help": true,
+      "showNotes": false,
+      "autoSlide": 0,
+      "autoSlideStoppable": true,
+      "mouseWheel": false,
+      "hideAddressBar": true,
+      "previewLinks": false,
+      "transition": "Concave",
+      "transitionSpeed": "default",
+      "backgroundTransition": "default",
+      "viewDistance": 3,
+      "parallaxBackgroundImage": "",
+      "parallaxBackgroundSize": "",
+      "parallaxBackgroundHorizontal": null,
+      "parallaxBackgroundVertical": null,
+      "slideExplorerEnabled": true,
+      "browserPath": null,
+      "attributes": ""
+    };
+    options = extend(defaultOptions, options, queryOptions);
+    Reveal.initialize(options);
+
+  </script>
+
+</body>
+
+</html>
